@@ -50,14 +50,13 @@
         "nunomaduro/collision": "^5.0",
         "phpunit/phpunit": "^9.3"
     },
-    "repositories": [
-        {
+    "repositories": [{
             "type": "vcs",
-            "url":  "https://github.com/jeremykenedy/Generators-1.git"
+            "url": "https://github.com/jeremykenedy/Generators-1.git"
         },
         {
             "type": "vcs",
-            "url":  "https://github.com/jeremykenedy/laravel-email-database-log.git"
+            "url": "https://github.com/jeremykenedy/laravel-email-database-log.git"
         }
     ],
     "config": {

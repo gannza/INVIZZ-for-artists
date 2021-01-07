@@ -90,7 +90,7 @@ input:focus {
     border: 2px solid dodgerblue;
 }
 
-.pac-target-input {
+.search-field {
     height: 66px;
     font-size: 20px;
 }

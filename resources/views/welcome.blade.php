@@ -169,7 +169,7 @@
 
         <div class="input-container">
             <div class="icon"><span class="iconify" data-icon="iwwa:search" data-inline="false" style="width: 30px;height:46px;"></span></div>
-            <input class="input-field" type="text" placeholder="Type your search..." name="search_id" id="search_id">
+            <input class="input-field search-field" type="text" placeholder="Type your search..." name="search_id" id="search_id">
         </div>
       </div>
       <a href="#" class="about-btn scrollto">Search</a>
