@@ -19,8 +19,10 @@ use Illuminate\Support\Facades\Route;
 Route::group(['middleware' => ['web', 'checkblocked']], function () {
     Route::get('/', 'App\Http\Controllers\WelcomeController@welcome')->name('welcome');
     Route::get('/terms', 'App\Http\Controllers\TermsController@terms')->name('terms');
-});
 
+    // Route::get('/', 'App\Http\Controllers\SearchController@index')->name('index');
+});
+Route::get('/location/{id}', 'App\Http\Controllers\SearchController@index')->name('index');
 // Authentication Routes
 Auth::routes();
 

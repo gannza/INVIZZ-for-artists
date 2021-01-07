@@ -28,7 +28,6 @@ Homestead.yaml
 Homestead.json
 
 ### Master Configs ###
-.env
 composer.lock
 package-lock.json
 yarn.lock

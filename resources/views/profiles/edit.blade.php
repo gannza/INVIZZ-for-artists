@@ -109,6 +109,10 @@
                                                             @endif
                                                         </div>
                                                     </div>
+                                                    <br>
+                                                    <div>
+                                                        <h3>Social Media</h3>
+                                                    </div>
                                                     <div class="form-group has-feedback {{ $errors->has('twitter_username') ? ' has-error ' : '' }}">
                                                         {!! Form::label('twitter_username', trans('profile.label-twitter_username') , array('class' => 'col-12 control-label')); !!}
                                                         <div class="col-12">
@@ -122,9 +126,9 @@
                                                         </div>
                                                     </div>
                                                     <div class="margin-bottom-2 form-group has-feedback {{ $errors->has('github_username') ? ' has-error ' : '' }}">
-                                                        {!! Form::label('github_username', trans('profile.label-github_username') , array('class' => 'col-12 control-label')); !!}
+                                                        {!! Form::label('github_username', trans('profile.label-facebook_username') , array('class' => 'col-12 control-label')); !!}
                                                         <div class="col-12">
-                                                            {!! Form::text('github_username', old('github_username'), array('id' => 'github_username', 'class' => 'form-control', 'placeholder' => trans('profile.ph-github_username'))) !!}
+                                                            {!! Form::text('github_username', old('github_username'), array('id' => 'github_username', 'class' => 'form-control', 'placeholder' => trans('profile.ph-facebook_username'))) !!}
                                                             <span class="glyphicon glyphicon-pencil form-control-feedback" aria-hidden="true"></span>
                                                             @if ($errors->has('github_username'))
                                                                 <span class="help-block">
@@ -133,6 +137,21 @@
                                                             @endif
                                                         </div>
                                                     </div>
+
+                                                    <div class="margin-bottom-2 form-group has-feedback {{ $errors->has('github_username') ? ' has-error ' : '' }}">
+                                                        {!! Form::label('github_username', trans('profile.label-instagram_username') , array('class' => 'col-12 control-label')); !!}
+                                                        <div class="col-12">
+                                                            {!! Form::text('github_username', old('github_username'), array('id' => 'github_username', 'class' => 'form-control', 'placeholder' => trans('profile.ph-instagram_username'))) !!}
+                                                            <span class="glyphicon glyphicon-pencil form-control-feedback" aria-hidden="true"></span>
+                                                            @if ($errors->has('github_username'))
+                                                                <span class="help-block">
+                                                                    <strong>{{ $errors->first('github_username') }}</strong>
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    
                                                     <div class="form-group margin-bottom-2">
                                                         <div class="col-12">
                                                             {!! Form::button(

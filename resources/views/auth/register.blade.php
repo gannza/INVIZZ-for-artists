@@ -6,7 +6,7 @@
         <div class="col-md-10">
             <div class="card">
                 <div class="card-header">{{ __('Register') }}</div>
-
+                
                 <div class="card-body">
                     <form method="POST" action="{{ route('register') }}">
                         @csrf
@@ -100,20 +100,20 @@
 
                         <div class="form-group row mb-4">
                             <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary" style="width:100%;">
                                     {{ __('Register') }}
                                 </button>
                             </div>
                         </div>
 
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="col-12 col-lg-10 offset-lg-1 col-xl-8 offset-xl-2">
                                 <p class="text-center mb-4">
                                     Or Use Social Logins to Register
                                 </p>
                                 @include('partials.socials')
                             </div>
-                        </div>
+                        </div> -->
 
                     </form>
                 </div>

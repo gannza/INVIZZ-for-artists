@@ -8,5 +8,12 @@
             var options; // = {componentRestrictions: {country: 'us'}};
             var autocomplete = new google.maps.places.Autocomplete(input, options);
         }
+
+        if(document.getElementById("search_id"))
+        {
+            var input = document.getElementById('search_id');
+            var options; // = {componentRestrictions: {country: 'us'}};
+            var autocomplete = new google.maps.places.Autocomplete(input, options);
+        }
      }//]]>
 </script>

@@ -110,7 +110,7 @@ class User extends Authenticatable
         return $this->hasMany(\App\Models\Social::class);
     }
 
-    /**
+    /** 
      * Get the profile associated with the user.
      */
     public function profile()

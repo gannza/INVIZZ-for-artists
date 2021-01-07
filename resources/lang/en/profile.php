@@ -47,10 +47,15 @@ return [
     'ph-bio'    => 'Enter your bio',
 
     'label-github_username' => 'Your GitHub username:',
+    'label-facebook_username' => 'Your FaceBook username:',
+    'label-instagram_username' => 'Your Instagram username:',
+    'label-website_username' => 'Your Website username:',
     'ph-github_username'    => 'Enter your GitHub username',
 
     'label-twitter_username' => 'Your Twitter username:',
     'ph-twitter_username'    => 'Enter your Twitter username',
+    'ph-instagram_username'    => 'Enter your Instagram username',
+    'ph-facebook_username'    => 'Enter your FaceBook username',
 
     // User Account Settings Tab
     'editTriggerAlt'        => 'Toggle User Menu',
