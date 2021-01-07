@@ -172,7 +172,7 @@
             <input class="input-field search-field" type="text" placeholder="Type your search..." name="search_id" id="search_id">
         </div>
       </div>
-      <a href="#" class="about-btn scrollto">Search</a>
+      <a href="/search" class="about-btn scrollto">Search</a>
     </div>
   </section><!-- End Intro Section -->
 

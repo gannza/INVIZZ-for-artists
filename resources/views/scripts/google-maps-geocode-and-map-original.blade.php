@@ -1,4 +1,4 @@
-@if ($user->profile && $user->profile->location)
+<!-- @if ($user->profile && $user->profile->location) -->
 
 	<script type='text/javascript' src='https://www.google.com/jsapi'></script>
 	<script type="text/javascript">
@@ -136,4 +136,4 @@
 
 	</script>
 
-@endif
+<!-- @endif -->

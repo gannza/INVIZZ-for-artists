@@ -25,7 +25,7 @@ class SearchController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($id)
+    public function index()
     {
         // 
         // $username = 'Admin';
@@ -42,7 +42,7 @@ class SearchController extends Controller
         //     'user' => $user,
         //     'currentTheme' => $currentTheme,
         // ];
-        // return view('artists.location')->with($data);
+        return view('artists.location');
     }
 
     /**

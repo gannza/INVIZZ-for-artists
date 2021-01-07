@@ -1,201 +1,231 @@
-@if ($user->profile && $user->profile->location)
-	<style>
-		pre {
-			border:1px solid #D6E0F5;
-			padding:5px;
-			margin:5px;
-			background:#EBF0FA;
-		}	
-		
-		/* fix for unwanted scroll bar in InfoWindow */
-		.scrollFix {
-			line-height: 1.35;
-			overflow: hidden;
-			white-space: nowrap;
-		}
-	
-	</style>
-	<script type='text/javascript' src='https://www.google.com/jsapi'></script>
-	<!-- <script src="http://maps.googleapis.com/maps/api/js" type="text/javascript"></script>	 -->
-	<script type="text/javascript">
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIwzALxUPNbatRBj3Xi1Uhp0fFzwWNBkE&callback=initMap&libraries=&v=weekly" defer></script> -->
+    <style type="text/css">
+        
+    </style>
+<script>
+        const mapStyle = [{
+            stylers: [{
+                visibility: "off"
+            }],
+        }, {
+            featureType: "landscape",
+            elementType: "geometry",
+            stylers: [{
+                visibility: "on"
+            }, {
+                color: "#fcfcfc"
+            }],
+        }, {
+            featureType: "water",
+            elementType: "geometry",
+            stylers: [{
+                visibility: "on"
+            }, {
+                color: "#bfd4ff"
+            }],
+        }, ];
+        let map;
+        let censusMin = Number.MAX_VALUE,
+            censusMax = -Number.MAX_VALUE; 
 
-		"use strict";
+        function initMap() { 
+            // load the map
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: {
+                    lat: 40,
+                    lng: -100
+                },
+                zoom: 8,
+                //styles: mapStyle,
+            });
+            // set up the style rules and events for google.maps.Data
+            map.data.setStyle(styleFeature);
+            map.data.addListener("mouseover", mouseInToRegion);
+            map.data.addListener("mouseout", mouseOutOfRegion);
+            map.data.addListener("click", mouseClickOfRegion);
+            // wire up the button
 
-		// variable to hold a map
-		var map;
+            clearCensusData();
+            loadCensusData("https://storage.googleapis.com/mapsdevsite/json/DP05_0017E");
 
-		// variable to hold current active InfoWindow
-		var activeInfoWindow ;		
+            const selectBox = document.getElementById("census-variable");
+            google.maps.event.addDomListener(selectBox, "change", () => {
+                clearCensusData();
+                loadCensusData(selectBox.options[selectBox.selectedIndex].value);
+                console.log(selectBox.options[selectBox.selectedIndex].value)
+            });
 
-		// ------------------------------------------------------------------------------- //
-		// initialize function		
-		// ------------------------------------------------------------------------------- //
 
-		function loadCensusData(variable) {
+            // state polygons only need to be loaded once, do them now
+            loadMapShapes();
+        }
+
+        /** Loads the state boundary polygons from a GeoJSON source. */
+        function loadMapShapes() {
+            // load US state outline polygons from a GeoJson file
+            map.data.loadGeoJson(
+                "https://storage.googleapis.com/mapsdevsite/json/states.js", {
+                    idPropertyName: "STATE"
+                }
+            );
+            // wait for the request to complete by listening for the first feature to be
+            // added
+            google.maps.event.addListenerOnce(map.data, "addfeature", () => {
+                google.maps.event.trigger(
+                    document.getElementById("census-variable"),"change"
+                );
+            });
+        }
+
+        /**
+         * Loads the census data from a simulated API call to the US Census API.
+         *
+         * @param {string} variable
+         */
+        function loadCensusData(variable) {
             // load the requested variable from the census API (using local copies)
             const xhr = new XMLHttpRequest();
-            xhr.open("GET", variable);
-			var row
+            xhr.open("GET", variable + ".json");
+
             xhr.onload = function() {
                 const censusData = JSON.parse(xhr.responseText);
-				console.log(censusData.features)
-				
-				for(row in censusData.features){
-					console.log(censusData.features[row].geometry)
-					// console.log(censusData.features[row].properties.name)
-				}
+                censusData.shift(); // the first row contains column names
+                censusData.forEach((row) => {
+                    const censusVariable = parseFloat(row[0]);
+                    const stateId = row[1];
+
+                    // keep track of min and max values
+                    if (censusVariable < censusMin) {
+                        censusMin = censusVariable;
+                    }
+
+                    if (censusVariable > censusMax) {
+                        censusMax = censusVariable;
+                    }
+                    // update the existing row with the new data
+
+                    //console.log("census:", stateId)
+
+                    map.data
+                        .getFeatureById(stateId)
+                        .setProperty("census_variable", censusVariable);
+                });
+                // update and display the legend
+                document.getElementById(
+                    "census-min"
+                ).textContent = censusMin.toLocaleString();
+                document.getElementById(
+                    "census-max"
+                ).textContent = censusMax.toLocaleString();
             };
             xhr.send();
-		}
-		
+        }
 
-		function initialize() {
-			
-			// map options - lots of options available here 
-			var mapOptions = {
-				scrollwheel: true,
-				disableDefaultUI: false,
-				draggable: true,
-				zoom: 8,
-				center: new google.maps.LatLng(44.9600, -93.1000),
-				mapTypeId: google.maps.MapTypeId.ROADMAP // HYBRID, ROADMAP, SATELLITE, or TERRAIN
-			};
-			
-			var json_url1 = "https://storage.googleapis.com/mapsdevsite/json/states.js"
-			var json_url = "./state.json"
-			var data_url = "https://storage.googleapis.com/mapsdevsite/json/DP05_0017E.json"
-			// create map in div called map-canvas using map options defined above
-			map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+        /** Removes census data from each shape on the map and resets the UI. */
+        function clearCensusData() {
+            censusMin = Number.MAX_VALUE;
+            censusMax = -Number.MAX_VALUE;
+            map.data.forEach((row) => {
+                row.setProperty("census_variable", undefined);
+            });
+            //document.getElementById("data-box").style.display = "none";
+            //document.getElementById("data-caret").style.display = "none";
+        }
 
-			// define three Google Map LatLng objects representing geographic points
-			var stPaul 			= new google.maps.LatLng(44.95273,-93.08915);
-			var minneapolis 	= new google.maps.LatLng(44.97994,-93.26630);
-			var falconHeights 	= new google.maps.LatLng(44.9917,-93.1664);
+        /**
+         * Applies a gradient style based on the 'census_variable' column.
+         * This is the callback passed to data.setStyle() and is called for each row in
+         * the data set.  Check out the docs for Data.StylingFunction.
+         *
+         * @param {google.maps.Data.Feature} feature
+         */
+        function styleFeature(feature) {
+            const low = [5, 69, 54]; // color of smallest datum
+            const high = [151, 83, 34]; // color of largest datum
+            // delta represents where the value sits between the min and max
+            const delta =
+                (feature.getProperty("census_variable") - censusMin) /
+                (censusMax - censusMin);
+            const color = [];
 
-			// place markers
-			fnPlaceMarkers(stPaul,"St Paul");
-			fnPlaceMarkers(minneapolis,"Minneapolis");			
-			fnPlaceMarkers(falconHeights,"Falcon Heights");
-			
-			map.data.loadGeoJson(
-				json_url,
-				{ idPropertyName: "STATE" },
-			);
-			loadCensusData(json_url)
-			// console.log(map.data.getFeatureById(3))
+            for (let i = 0; i < 3; i++) {
+                // calculate an integer color based on the delta
+                color.push((high[i] - low[i]) * delta + low[i]);
+            }
+            // determine whether to show this shape or not
+            let showRow = true;
 
-			const flightPlanCoordinates = [
-				{ lat: 37.772, lng: -122.214 },
-				{ lat: 21.291, lng: -157.821 },
-				{ lat: -18.142, lng: 178.431 },
-				{ lat: -27.467, lng: 153.027 },
-			];	
+            if (
+                feature.getProperty("census_variable") == null ||
+                isNaN(feature.getProperty("census_variable"))
+            ) {
+                showRow = false;
+            }
+            let outlineWeight = 0.5,
+                filedColor = "#9BCA82",
+                filledOpacity = 0,
+                zIndex = 1;
 
-			const flightPath = new google.maps.Polyline({
-				path: flightPlanCoordinates,
-				geodesic: true,
-				strokeColor: "#FF6600",
-				strokeOpacity: 1.0,
-				strokeWeight: 2,
-			});
+            if (feature.getProperty("state") === "hover") {
+                outlineWeight = zIndex = 2;
+                filledOpacity = 0.5
+            }
 
-			flightPath.setMap(map);
+            if (feature.getProperty("state") === "click") {
+                outlineWeight = zIndex = 4;
+                filedColor = "#FBCA82"
+                filledOpacity = 0.5
+            }
 
+            console.log(feature.getProperty("NAME"))
+            return {
+                strokeWeight: outlineWeight,
+                strokeColor: "#588FE9",
+                zIndex: zIndex,
+                fillColor: filedColor,
+                fillOpacity: filledOpacity,
+                visible: showRow,
+            };
+        }
 
-			
-		}
+        /**
+         * Responds to the mouse-in event on a map shape (state).
+         *
+         * @param {?google.maps.MouseEvent} e
+         */
+        function mouseInToRegion(e) {
+            // set the hover state so the setStyle function can change the border
+            e.feature.setProperty("state", "hover");
+            const percent =
+                ((e.feature.getProperty("census_variable") - censusMin) /
+                    (censusMax - censusMin)) * 100;
+            // update the label
+            document.getElementById(
+                "data-label"
+            ).textContent = e.feature.getProperty("NAME");
 
-		// ------------------------------------------------------------------------------- //
-		// create markers on the map
-		// ------------------------------------------------------------------------------- //
-		function fnPlaceMarkers(myLocation,myCityName){
-				
-			var marker = new google.maps.Marker({
-				position : myLocation,
-				icon: { path: google.maps.SymbolPath.CIRCLE, fillColor: ("#fc384a"), fillOpacity: 1, scale: 8, strokeColor: "white", strokeWeight: 3 },
-			});
-			// var marker = new google.maps.Marker({
-			// 	position: myLocation,
-			// 	icon: {
-			// 		path: google.maps.SymbolPath.CIRCLE,
-			// 		scale: 10,
-			// 	},
-			// 	draggable: true,
-			// 	map: map,
-			// });
+            //console.log(e.feature.getProperty("NAME"))
+            document.getElementById(
+                    "data-value"
+                ).textContent = e.feature
+                .getProperty("census_variable")
+                .toLocaleString();
+            // document.getElementById("data-box").style.display = "block";
+            // document.getElementById("data-caret").style.display = "block";
+            // document.getElementById("data-caret").style.paddingLeft = percent + "%";
+        }
 
-			// Renders the marker on the specified map
-			marker.setMap(map);	
+        function mouseClickOfRegion(e) {
+            e.feature.setProperty("state", "click");
+        }
 
-			// create an InfoWindow - for mouseover
-			var infoWnd = new google.maps.InfoWindow();						
-
-			// create an InfoWindow -  for mouseclick
-			var infoWnd2 = new google.maps.InfoWindow();
-
-			// variable to hold number of seconds before showing infoWindow on Mouseover event
-			var mouseoverTimeoutId = null;
-			
-			
-			// -----------------------
-			// ON MOUSEOVER
-			// -----------------------
-			
-			// add content to your InfoWindow
-			infoWnd.setContent('<div class="scrollFix">' + '<img src="' + '{{$user->profile->avatar}}' + '" style="width:40px; heigth:40px;">' + '</div>');
-			
-			// add listener on InfoWindow for mouseover event
-			google.maps.event.addListener(marker, 'mouseover', function() {
-			
-				// Close active window if exists - [one might expect this to be default behaviour no?]				
-				if(activeInfoWindow != null) activeInfoWindow.close();
-
-				// Close info Window on mouseclick if already opened
-				infoWnd2.close();
-
-				// Open new InfoWindow for mouseover event
-				infoWnd.open(map, marker);
-
-				// Store new open InfoWindow in global variable
-				activeInfoWindow = infoWnd;	
-
-			}); 							
-			
-			// on mouseout (moved mouse off marker) make infoWindow disappear
-			google.maps.event.addListener(marker, 'mouseout', function() {
-				infoWnd.close();	
-			});
-			
-			// --------------------------------
-			// ON MARKER CLICK - (Mouse click)
-			// --------------------------------
-			
-			// add content to InfoWindow for click event 
-			infoWnd2.setContent('<div class="scrollFix">' + 'Welcome to ' +  myCityName + '. <br/>This Infowindow appears when you click on marker</div>');
-			
-			// add listener on InfoWindow for click event
-			google.maps.event.addListener(marker, 'click', function() {
-				
-				//Close active window if exists - [one might expect this to be default behaviour no?]				
-				if(activeInfoWindow != null) activeInfoWindow.close();
-
-				// Open InfoWindow - on click 
-				infoWnd2.open(map, marker);
-				
-				// Close "mouseover" infoWindow
-				infoWnd.close();
-				
-				// Store new open InfoWindow in global variable
-				activeInfoWindow = infoWnd2;
-			}); 							
-			
-		}
-
-		// ------------------------------------------------------------------------------- //
-		// initial load
-		// ------------------------------------------------------------------------------- //		
-		google.maps.event.addDomListener(window, 'load', initialize);
-
-	</script>
-
-@endif
+        /**
+         * Responds to the mouse-out event on a map shape (state).
+         *
+         */
+        function mouseOutOfRegion(e) {
+            // reset the hover state, returning the border to normal
+            e.feature.setProperty("state", "normal");
+        }
+    </script>
